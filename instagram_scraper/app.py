@@ -105,7 +105,6 @@ class InstagramScraper(object):
 
             # Get the user metadata.
             # user = self.fetch_user(username)
-            # print(user)
 
             # if user:
                 # Download the profile pic if not the default.
@@ -138,7 +137,7 @@ class InstagramScraper(object):
                     break
                 else:
                     like_count = item['likes']['count']
-                    if like_count == 0:
+                    if like_count == 0 and item['type'] != 'video':
                         future = executor.submit(self.download, item, dst)
                         future_to_item[future] = item
 
@@ -160,6 +159,7 @@ class InstagramScraper(object):
         if resp.status_code == 200 and '_sharedData' in resp.text:
             try:
                 shared_data = resp.text.split("window._sharedData = ")[1].split(";</script>")[0]
+                print(json.loads(shared_data))
                 return json.loads(shared_data)['entry_data']['ProfilePage'][0]['user']
             except (TypeError, KeyError, IndexError):
                 pass
