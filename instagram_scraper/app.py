@@ -14,7 +14,7 @@ import concurrent.futures
 import requests
 import tqdm
 
-from instagram_scraper.constants import *
+from constants import *
 
 warnings.filterwarnings('ignore')
 
