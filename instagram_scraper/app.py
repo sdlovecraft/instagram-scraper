@@ -104,29 +104,30 @@ class InstagramScraper(object):
             dst = self.make_dst_dir(username)
 
             # Get the user metadata.
-            user = self.fetch_user(username)
+            # user = self.fetch_user(username)
+            # print(user)
 
-            if user:
+            # if user:
                 # Download the profile pic if not the default.
-                if 'profile_pic_url_hd' in user and '11906329_960233084022564_1448528159' not in user['profile_pic_url_hd']:
-                    item = {'url': re.sub(r'/s\d{3,}x\d{3,}/', '/', user['profile_pic_url_hd'])}
-                    for item in tqdm.tqdm([item], desc='Searching {0} for profile pic'.format(username), unit=" images", ncols=0, disable=self.quiet):
-                        future = executor.submit(self.download, item, dst)
-                        future_to_item[future] = item
+                # if 'profile_pic_url_hd' in user and '11906329_960233084022564_1448528159' not in user['profile_pic_url_hd']:
+                #     item = {'url': re.sub(r'/s\d{3,}x\d{3,}/', '/', user['profile_pic_url_hd'])}
+                #     for item in tqdm.tqdm([item], desc='Searching {0} for profile pic'.format(username), unit=" images", ncols=0, disable=self.quiet):
+                #         future = executor.submit(self.download, item, dst)
+                #         future_to_item[future] = item
 
-                if self.logged_in:
-                    # Get the user's stories.
-                    stories = self.fetch_stories(user['id'])
+                # if self.logged_in:
+                #     # Get the user's stories.
+                #     stories = self.fetch_stories(user['id'])
 
-                    # Downloads the user's stories and sends it to the executor.
-                    iter = 0
-                    for item in tqdm.tqdm(stories, desc='Searching {0} for stories'.format(username), unit=" media", disable=self.quiet):
-                        iter = iter + 1
-                        if ( self.max != 0 and iter >= self.max ):
-                            break
-                        else:
-                            future = executor.submit(self.download, item, dst)
-                            future_to_item[future] = item
+                #     # Downloads the user's stories and sends it to the executor.
+                #     iter = 0
+                #     for item in tqdm.tqdm(stories, desc='Searching {0} for stories'.format(username), unit=" media", disable=self.quiet):
+                #         iter = iter + 1
+                #         if ( self.max != 0 and iter >= self.max ):
+                #             break
+                #         else:
+                #             future = executor.submit(self.download, item, dst)
+                #             future_to_item[future] = item
 
             # Crawls the media and sends it to the executor.
             iter = 0
@@ -136,8 +137,10 @@ class InstagramScraper(object):
                 if ( self.max != 0 and iter >= self.max ):
                     break
                 else:
-                    future = executor.submit(self.download, item, dst)
-                    future_to_item[future] = item
+                    like_count = item['likes']['count']
+                    if like_count == 4:
+                        future = executor.submit(self.download, item, dst)
+                        future_to_item[future] = item
 
             # Displays the progress bar of completed downloads. Might not even pop up if all media is downloaded while
             # the above loop finishes.
