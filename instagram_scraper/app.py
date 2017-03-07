@@ -138,7 +138,7 @@ class InstagramScraper(object):
                     break
                 else:
                     like_count = item['likes']['count']
-                    if like_count == 4:
+                    if like_count == 0:
                         future = executor.submit(self.download, item, dst)
                         future_to_item[future] = item
 
