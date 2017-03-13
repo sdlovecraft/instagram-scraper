@@ -6,3 +6,6 @@ wadl.xml
 .eggs
 build
 dist
+.DS_STORE
+instagram_scraper/.DS_STORE
+instagram_scraper/images/
