@@ -9,6 +9,7 @@ import os
 import re
 import time
 import warnings
+import csv
 
 import concurrent.futures
 import requests
@@ -261,6 +262,27 @@ class InstagramScraper(object):
         return logger
 
     @staticmethod
+    def is_username(username):
+        return re.match("^(?!_)\w{3,15}$", username) and not username.isdigit() and username not in ['Username', 'true', 'false', 'Profile_pic_url', 'is_verified']
+
+    @staticmethod
+    def num_there(s):
+        return any(i.isdigit() for i in s)
+
+
+    @staticmethod
+    def parse_csv_usernames(usernames_file):
+        users = []
+        print('usernames', usernames_file)
+        with open(usernames_file, 'r') as csvfile:
+            csvreader = csv.reader(csvfile, delimiter=',')
+            for row in csvreader:
+                for line in row:
+                    if InstagramScraper.is_username(line) and line not in users:
+                        users.append(line)
+            return users
+
+    @staticmethod
     def parse_file_usernames(usernames_file):
         '''Parses a file containing a list of usernames.'''
         users = []
@@ -309,8 +331,10 @@ def main():
         raise ValueError('Must provide only one of the following: username(s) OR a filename containing username(s)')
     usernames = []
 
-    if args.filename:
+    if args.filename and args.filename.endswith('.txt'):
         usernames = InstagramScraper.parse_file_usernames(args.filename)
+    elif args.filename and args.filename.endswith('.csv'):
+        usernames = InstagramScraper.parse_csv_usernames(args.filename)
     else:
         usernames = InstagramScraper.parse_str_usernames(','.join(args.username))
 
