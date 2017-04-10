@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+from multiprocessing.dummy import Pool as ThreadPool 
 import argparse
 import errno
 import json
@@ -97,8 +97,9 @@ class InstagramScraper(object):
     def scrape(self):
         """Crawls through and downloads user's media"""
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+        #pool = ThreadPool(4) 
 
-        for username in self.usernames:
+        def scrape_user(username):
             future_to_item = {}
 
             # Make the destination dir.
@@ -107,32 +108,9 @@ class InstagramScraper(object):
             # Get the user metadata.
             # user = self.fetch_user(username)
 
-            # if user:
-                # Download the profile pic if not the default.
-                # if 'profile_pic_url_hd' in user and '11906329_960233084022564_1448528159' not in user['profile_pic_url_hd']:
-                #     item = {'url': re.sub(r'/s\d{3,}x\d{3,}/', '/', user['profile_pic_url_hd'])}
-                #     for item in tqdm.tqdm([item], desc='Searching {0} for profile pic'.format(username), unit=" images", ncols=0, disable=self.quiet):
-                #         future = executor.submit(self.download, item, dst)
-                #         future_to_item[future] = item
-
-                # if self.logged_in:
-                #     # Get the user's stories.
-                #     stories = self.fetch_stories(user['id'])
-
-                #     # Downloads the user's stories and sends it to the executor.
-                #     iter = 0
-                #     for item in tqdm.tqdm(stories, desc='Searching {0} for stories'.format(username), unit=" media", disable=self.quiet):
-                #         iter = iter + 1
-                #         if ( self.max != 0 and iter >= self.max ):
-                #             break
-                #         else:
-                #             future = executor.submit(self.download, item, dst)
-                #             future_to_item[future] = item
-
             # Crawls the media and sends it to the executor.
             iter = 0
-            for item in tqdm.tqdm(self.media_gen(username), desc='Searching {0} for posts'.format(username),
-                                unit=' media', disable=self.quiet):
+            for item in self.media_gen(username):
                 iter = iter + 1
                 if ( self.max != 0 and iter >= self.max ):
                     break
@@ -144,12 +122,16 @@ class InstagramScraper(object):
 
             # Displays the progress bar of completed downloads. Might not even pop up if all media is downloaded while
             # the above loop finishes.
-            for future in tqdm.tqdm(concurrent.futures.as_completed(future_to_item), total=len(future_to_item),
-                                desc='Downloading', disable=self.quiet):
-                item = future_to_item[future]
+            # for future in tqdm.tqdm(concurrent.futures.as_completed(future_to_item), total=len(future_to_item),
+            #                     desc='Downloading', disable=self.quiet):
+            #     item = future_to_item[future]
 
-                if future.exception() is not None:
-                    self.logger.warning('Media id {0} at {1} generated an exception: {2}'.format(item['id'], item['url'], future.exception()))
+            #     if future.exception() is not None:
+            #         self.logger.warning('Media id {0} at {1} generated an exception: {2}'.format(item['id'], item['url'], future.exception()))
+
+        pool = ThreadPool(100)
+        print(len(self.usernames))
+        pool.map(scrape_user, self.usernames)
 
         self.logout()
 
