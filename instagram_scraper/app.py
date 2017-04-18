@@ -10,6 +10,7 @@ import re
 import time
 import warnings
 import csv
+import random
 
 import concurrent.futures
 import requests
@@ -116,7 +117,8 @@ class InstagramScraper(object):
                     break
                 else:
                     like_count = item['likes']['count']
-                    if like_count == 0 and item['type'] != 'video':
+                    if item['type'] != 'video':
+                    # if like_count == 0 and item['type'] != 'video':
                         future = executor.submit(self.download, item, dst)
                         future_to_item[future] = item
 
@@ -131,6 +133,9 @@ class InstagramScraper(object):
 
         pool = ThreadPool(100)
         print(len(self.usernames))
+        print(self.usernames[:10])
+        random.shuffle(self.usernames)
+        print(self.usernames[:10])
         pool.map(scrape_user, self.usernames)
 
         self.logout()
