@@ -117,7 +117,7 @@ class InstagramScraper(object):
                     break
                 else:
                     like_count = item['likes']['count']
-                    if item['type'] != 'video':
+                    if item['type'] == 'video' and like_count == 0:
                     # if like_count == 0 and item['type'] != 'video':
                         future = executor.submit(self.download, item, dst)
                         future_to_item[future] = item
@@ -196,7 +196,7 @@ class InstagramScraper(object):
             if not media['items']:
                 raise ValueError('User {0} is private'.format(username))
 
-            media['items'] = [self.set_media_url(item) for item in media['items']]
+            media['items'] = [self.set_media_url(item) for item in media['items'] if item['type'] != 'carousel']
             return media
         else:
             raise ValueError('User {0} does not exist'.format(username))
